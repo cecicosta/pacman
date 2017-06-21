@@ -1,54 +1,20 @@
 package com.pacman.entrada;
 
-public class ControladorFantasma {
-	public enum Estatos implements Estado {
-		CIMA {
-	        @Override
-	        public Estado proximo(Entrada word) {
-	            switch(word.leia()) {
-                case 'a': return CIMA;
-                case 'b': return BAIXO;
-                case 'c': return ESQUERDA;
-                case 'd': return DIREITA;
-	            default: return null;
-	            }
-	        }
-	    },
-	    BAIXO {
-	        @Override
-	        public Estado proximo(Entrada word) {
-	            switch(word.leia()) {
-                case 'a': return CIMA;
-                case 'b': return BAIXO;
-                case 'c': return ESQUERDA;
-                case 'd': return DIREITA;
-	            default: return null;
-	            }
-	        }
-	    },
-		ESQUERDA {
-	        @Override
-	        public Estado proximo(Entrada word) {
-	            switch(word.leia()) {
-                case 'a': return CIMA;
-                case 'b': return BAIXO;
-                case 'c': return ESQUERDA;
-                case 'd': return DIREITA;
-	            default: return null;
-	            }
-	        }
-	    },
-		DIREITA {
-	        @Override
-	        public Estado proximo(Entrada word) {
-	            switch(word.leia()) {
-                case 'a': return CIMA;
-                case 'b': return BAIXO;
-                case 'c': return ESQUERDA;
-                case 'd': return DIREITA;
-	            default: return null;
-	            }
-	        }
-	    },
-	}	
+public class ControladorFantasma extends ControladorCallback{
+	
+	public ControladorFantasma(int i, int j) {
+		super(i, j);
+	}
+
+	//Controlador baseado na posição relativa do pacman
+	public void controlador(int i, int j){
+		if(i > posicao[0])
+			palavra += 'c';
+		else if(i < posicao[0])
+			palavra += 'b';
+		else if(j > posicao[1])
+			palavra += 'd';
+		else if(j < posicao[1])
+			palavra += 'e';
+	}
 }

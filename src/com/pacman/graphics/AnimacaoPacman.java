@@ -6,6 +6,10 @@ import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
+import java.io.IOException;
+import java.io.InputStream;
+
+import javax.imageio.ImageIO;
 
 public class AnimacaoPacman {
 	private int d = 16;
@@ -25,11 +29,29 @@ public class AnimacaoPacman {
     	}
 	}
 	private int contador;
-	
+
+	private Image spriteSheet;
 	private BufferedImage frames[] = new BufferedImage[20];
 	private Frame frame;
-	public AnimacaoPacman(Image spriteSheet, Frame f){
+	public AnimacaoPacman(Frame f){
 		frame = f;        
+		
+		//Carrega sprites da animação
+        String path = "pacman-large.png";
+        try {
+        	InputStream stream = Thread.currentThread().getContextClassLoader().getResourceAsStream(path);
+        	spriteSheet = ImageIO.read(stream);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+        //Redimenciona sprites 
+        int resW = spriteSheet.getWidth(frame)/4;
+        int resH = spriteSheet.getHeight(frame)/4;
+        BufferedImage escalado = new BufferedImage(resW, resH, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g = escalado.createGraphics();
+        g.drawImage(spriteSheet, 0, 0, resW, resH, null); 
+        g.dispose();
+		
         BufferedImage tileset = new BufferedImage(spriteSheet.getWidth(f), 
         		spriteSheet.getHeight(f), BufferedImage.TYPE_INT_RGB);
         Graphics2D g2d = tileset.createGraphics();
@@ -37,7 +59,7 @@ public class AnimacaoPacman {
         //Carregar os frames de movimento do pacman
         for(int j=0; j < 2; j++){
         	for(int i=0; i < 6; i++){
-	        	g2d.drawImage(spriteSheet, - (9+j)*d, -i*d, f);
+	        	g2d.drawImage(escalado, - (9+j)*d, -i*d, f);
 		        Raster temp = tileset.getData( new Rectangle( 0, 0, d, d) );
 		        frames[j*6 + i] = new BufferedImage( d, d, BufferedImage.TYPE_INT_RGB );
 		        frames[j*6 + i].setData( temp );	
@@ -46,7 +68,7 @@ public class AnimacaoPacman {
         
         //Carregar os frames de morte do pacman
         for(int i=0; i < 8; i++){
-        	g2d.drawImage(spriteSheet, - 8*d, -i*d, f);
+        	g2d.drawImage(escalado, - 8*d, -i*d, f);
 	        Raster temp = tileset.getData( new Rectangle( 0, 0, d, d) );
 	        frames[12 + i] = new BufferedImage( d, d, BufferedImage.TYPE_INT_RGB );
 	        frames[12 + i].setData( temp );
@@ -54,12 +76,14 @@ public class AnimacaoPacman {
 	}
 	
 	public void Play(Frames frames){
+		if(frames == atual)
+			return;
 		atual = frames;
 		contador = atual.inicio;
 	}
 	
-	public void Animar(Graphics g){
-		g.drawImage( frames[contador++], 100, 100, frame );
+	public void Animar(Graphics g, int x, int y){
+		g.drawImage( frames[contador++], x, y, frame );
 		if(contador > atual.fim) contador = atual.inicio;
 	}
 }
