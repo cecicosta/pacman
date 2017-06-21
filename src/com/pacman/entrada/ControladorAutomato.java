@@ -1,11 +1,11 @@
 package com.pacman.entrada;
 
-public class ControladorCallback {
+public class ControladorAutomato {
 
 	String palavra = "";
 	Estados estado = Estados.DIREITA;
 	int[] posicao = {0,0};
-	public ControladorCallback(int i, int j){
+	public ControladorAutomato(int i, int j){
 		posicao[0] = i;
 		posicao[1] = j;
 	}
@@ -31,6 +31,7 @@ public class ControladorCallback {
 			i++;
 			break;
 		}
+		//Impede que a entidade invada uma posição invalida no labirinto
 		if(Labirinto.celula(posicao[0] + i, posicao[1] + j) != 'x'){
 			posicao[0] += i;
 			posicao[1] += j;
@@ -65,6 +66,7 @@ public class ControladorCallback {
                 case 'b': return BAIXO;
                 case 'e': return ESQUERDA;
                 case 'd': return DIREITA;
+                case 'm': return MORTO;
 	            default: return null;
 	            }
 	        }
@@ -77,6 +79,7 @@ public class ControladorCallback {
                 case 'b': return BAIXO;
                 case 'e': return ESQUERDA;
                 case 'd': return DIREITA;
+                case 'm': return MORTO;
 	            default: return null;
 	            }
 	        }
@@ -89,6 +92,7 @@ public class ControladorCallback {
                 case 'b': return BAIXO;
                 case 'e': return ESQUERDA;
                 case 'd': return DIREITA;
+                case 'm': return MORTO;
 	            default: return null;
 	            }
 	        }
@@ -101,9 +105,16 @@ public class ControladorCallback {
                 case 'b': return BAIXO;
                 case 'e': return ESQUERDA;
                 case 'd': return DIREITA;
+                case 'm': return MORTO;
 	            default: return null;
 	            }
 	        }
 	    },
+		MORTO {
+	        public Estado proximo(char word) {
+		           return MORTO;
+            }
+        },
+	    
 	}	
 }

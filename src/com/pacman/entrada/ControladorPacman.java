@@ -1,6 +1,6 @@
 package com.pacman.entrada;
 
-public class ControladorPacman extends ControladorCallback {
+public class ControladorPacman extends ControladorAutomato {
 
 	public ControladorPacman(int i, int j) {
 		super(i, j);

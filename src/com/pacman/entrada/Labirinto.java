@@ -19,9 +19,9 @@ public class Labirinto {
 			+ " x.x    x.x x.x     x x     x.x  x.x          "
 			+ " x.xxxx x.x x.x xxxxx xxxxx x.x  x.x          "
 			+ " x....x x.xxx.x x         x x.x  x.x          "
-			+ " x.xxxx x.....x x         x x.xxxx.x          "
-			+ " x.x    x.xxx.x x         x x......x          "
-			+ " x.x    x.x x.x xxxxxxxxxxx x.xxxx.x          "
+			+ " x.xxxx x.....xxx         xxx.xxxx.x          "
+			+ " x.x    x.xxx.   0  1 2  3   ......x          "
+			+ " x.x    x.x x.xxxxxxxxxxxxxxx.xxxx.x          "
 			+ " x.x    x.x x.x             x.x  x.x          "
 			+ " x.xxxxxx.xxx.xxxxxxxxxxxxxxx.xxxx.xxxxxxxxxx "
 			+ " x...................s......................x "
@@ -43,6 +43,11 @@ public class Labirinto {
 	
 	public static int[] coordenadaInicial(){
 		int posicao = Labirinto.labirinto.indexOf("s");
+		return new int[]{posicao/largura, posicao%largura} ;
+	}
+	
+	public static int[] coordenadaCelula(char c){
+		int posicao = Labirinto.labirinto.indexOf(c);
 		return new int[]{posicao/largura, posicao%largura} ;
 	}
 	

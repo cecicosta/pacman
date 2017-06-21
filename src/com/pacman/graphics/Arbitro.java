@@ -15,9 +15,10 @@ import java.awt.event.KeyListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
-import com.pacman.entrada.ControladorCallback;
+import com.pacman.entrada.ControladorFantasma;
 import com.pacman.entrada.ControladorPacman;
-import com.pacman.entrada.Entrada;
+import com.pacman.entrada.Labirinto;
+import com.pacman.entrada.MaquinaDeEstados;
 import com.pacman.graphics.AnimacaoPacman.Frames;
 
 public class Arbitro extends Frame implements ActionListener, WindowListener, Runnable, KeyListener{
@@ -31,6 +32,7 @@ public class Arbitro extends Frame implements ActionListener, WindowListener, Ru
 	private MenuItem sobre;
 	private boolean gameInit = false;
 	
+	AnimacaoFantasmas[] fantasmas = new AnimacaoFantasmas[4];
 	AnimacaoPacman pacman;
 	DesenharLabirinto labirinto;
 	private int sinalAtualizar = 0;
@@ -44,6 +46,8 @@ public class Arbitro extends Frame implements ActionListener, WindowListener, Ru
 	private int largura;
 
 	private Thread threadPacman;
+	private ControladorFantasma[] controlFantasmas = new ControladorFantasma[4];
+	private Thread[] threadFantasmas = new Thread[4];
 	public Arbitro(){
 		super("PAC MAN");
 		
@@ -57,6 +61,18 @@ public class Arbitro extends Frame implements ActionListener, WindowListener, Ru
 		sobre.addActionListener(this);
 		addKeyListener(this);
 		
+		for(int i=0; i<4; i++){
+			fantasmas[i] = new AnimacaoFantasmas(this);
+			fantasmas[i].carregarFrames("pacman-large.png", 12+i, 0, 1, 8, 16);
+			fantasmas[i].Play(AnimacaoFantasmas.Frames.CIMA);
+			
+			int[] pos = Labirinto.coordenadaCelula(Integer.toString(i).charAt(0));
+			controlFantasmas[i] = new ControladorFantasma(pos[0], pos[1]);
+			MaquinaDeEstados inFantasma = new MaquinaDeEstados(controlFantasmas[i]);
+			threadFantasmas[i]= new Thread(inFantasma);
+			threadFantasmas[i].start();
+		}
+		
 		pacman = new AnimacaoPacman(this);
 		pacman.Play(AnimacaoPacman.Frames.DIREITA);
 		labirinto = new DesenharLabirinto(this);
@@ -64,7 +80,7 @@ public class Arbitro extends Frame implements ActionListener, WindowListener, Ru
 		//Cria e inicia thread do controlador do pacman
 		int[] posicao = labirinto.coordenadaInicial();
 		controlPacman = new ControladorPacman(posicao[0], posicao[1]);
-		Entrada inPacman = new Entrada(controlPacman);
+		MaquinaDeEstados inPacman = new MaquinaDeEstados(controlPacman);
 		threadPacman = new Thread(inPacman);
 		threadPacman.start();
 		
@@ -105,6 +121,7 @@ public class Arbitro extends Frame implements ActionListener, WindowListener, Ru
 		g.fillRect(0,0, largura, altura);	
 	}
 	
+	//Atualiza entidades baseadas no estado e posição
 	public void update(Graphics g)
 	{
 		if (sinalAtualizar > 0)
@@ -126,10 +143,20 @@ public class Arbitro extends Frame implements ActionListener, WindowListener, Ru
 				pacman.Play(Frames.CIMA); break;
 			case BAIXO:
 				pacman.Play(Frames.BAIXO); break;
+			case MORTO:
+				pacman.Play(Frames.MORTE); break;
 			}
 			
 			pacman.Animar(g, posX + posicao[1]*d - d/2, 
 							 posY + posicao[0]*d - d/2);
+			for(int i=0; i<4; i++){
+				int[] pos = controlFantasmas[i].getPosicao();
+				fantasmas[i].Animar(g, posX + pos[1]*d - d/2, 
+									   posY + pos[0]*d - d/2);
+				if(pos[0] == posicao[0] && pos[1] == posicao[1]){
+					controlPacman.controlador('m');
+				}
+			}
 		}
 	}
 
@@ -139,6 +166,9 @@ public class Arbitro extends Frame implements ActionListener, WindowListener, Ru
 	public void windowClosed(WindowEvent e) {}
 	@Override
 	public void windowClosing(WindowEvent e) { 
+		for(int i=0; i<4; i++){
+			threadFantasmas[i].interrupt();
+		}
 		threadPacman.interrupt();
 		temporizador.interrupt();
 		dispose(); 
@@ -164,6 +194,10 @@ public class Arbitro extends Frame implements ActionListener, WindowListener, Ru
 				return;
 			}
 
+			int[] posicao = controlPacman.getPosicao();
+			for(int i=0; i<4; i++){
+				controlFantasmas[i].controlador(posicao[0], posicao[1]);
+			}
 			sinalAtualizar++;
 			repaint();
 		}
@@ -171,10 +205,8 @@ public class Arbitro extends Frame implements ActionListener, WindowListener, Ru
 
 	@Override
 	public void keyPressed(KeyEvent arg0) {
-		System.out.println("Comando");
 		switch(arg0.getKeyCode()){
 		case KeyEvent.VK_RIGHT:
-			System.out.println("Direita");
 			rastroPacman += "d";
 			controlPacman.controlador('d');
 			break;

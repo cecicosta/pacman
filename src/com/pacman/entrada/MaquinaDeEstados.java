@@ -4,10 +4,10 @@ interface Estado {
     public Estado proximo(char in);
 }
 
-public class Entrada implements Runnable{	
-	private ControladorCallback c;
+public class MaquinaDeEstados implements Runnable{	
+	private ControladorAutomato c;
     private int atual = 0;
-    public Entrada(ControladorCallback c) {
+    public MaquinaDeEstados(ControladorAutomato c) {
     	this.c = c;
     }
 	@Override
@@ -18,11 +18,8 @@ public class Entrada implements Runnable{
 			{
 				return;
 			}
-			//System.out.println(atual);
 			if(atual < c.getPalavra().length()){
-				System.out.println(atual);
 				Estado e = c.getEstado();
-				System.out.println("State machine");
 				System.out.flush();
 				c.setEstado(e.proximo(c.getPalavra().charAt(atual++)));	
 			}

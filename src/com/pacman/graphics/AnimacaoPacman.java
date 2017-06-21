@@ -75,6 +75,7 @@ public class AnimacaoPacman {
         }
 	}
 	
+	//Determina qual sequencia de frames será tocada
 	public void Play(Frames frames){
 		if(frames == atual)
 			return;
