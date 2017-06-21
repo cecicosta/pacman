@@ -16,6 +16,7 @@ public class ControladorAutomato {
 	public void setEstado(Estado estado) {
 		int i = 0;
 		int j = 0;
+		Estados anterior = this.estado;
 		this.estado = (Estados) estado;
 		switch(this.estado){
 		case DIREITA:
@@ -30,12 +31,15 @@ public class ControladorAutomato {
 		case BAIXO:
 			i++;
 			break;
+		default:
+			break;
 		}
 		//Impede que a entidade invada uma posição invalida no labirinto
-		if(Labirinto.celula(posicao[0] + i, posicao[1] + j) != 'x'){
+		if(Labirinto.getCelula(posicao[0] + i, posicao[1] + j) != 'x'){
 			posicao[0] += i;
 			posicao[1] += j;
 		}
+		estadoAtualizado(anterior, this.estado);
 	}
 
 	public Estados getEstado() {
@@ -55,6 +59,8 @@ public class ControladorAutomato {
 		posicao[0] = 0;
 		posicao[1] = 0;
 	}
+	
+	public void estadoAtualizado(Estados anterior, Estados novo){}
 	
 	//Representação do automato para controle de movimentação
 	public enum Estados implements Estado {

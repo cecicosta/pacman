@@ -6,21 +6,21 @@ public class Labirinto {
 	public static String labirinto = ""
 			+ "                                              "
 			+ " xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx "
-			+ " x.........................................ox "
+			+ " x..........................................x "
 			+ " x.xxxxxxx.xxx.xxx.xxxxx.xxx.xxx.xxxxxx.xxx.x "
 			+ " x.x     x.x x.x x.x   x.x x.x x.x    x.x x.x "
 			+ " x.xxxxxxx.x x.xxx.xxx x.xxx.xxx.xxxx x.xxx.x "
-			+ " x........ox x......ox x............x x.....x "
+			+ " x.........x x.......x x............x x.....x "
 			+ " x.xxx.xxxxx x.xxx.xxx x.xxxxxxxxxxxx x.xxx.x "
 			+ " x.x x.x     x.x x.x   x.x            x.x x.x "
 			+ " x.xxx.xxxxxxx.xxx.xxxxx.xxxxxxxxxxxxxx.xxx.x "
 			+ " x..........................................x "
-			+ " x.xxxxxx.xxx.xxxxxxx xxxxxxx.xxxx.xxxxxxxxxx "
-			+ " x.x    x.x x.x     x x     x.x  x.x          "
-			+ " x.xxxx x.x x.x xxxxx xxxxx x.x  x.x          "
-			+ " x....x x.xxx.x x         x x.x  x.x          "
-			+ " x.xxxx x.....xxx         xxx.xxxx.x          "
-			+ " x.x    x.xxx.   0  1 2  3   ......x          "
+			+ " x.xxxxxx.xxx.xxxxxxxexxxxxxx.xxxx.xxxxxxxxxx "
+			+ " x.x    x.x x.x     xex     x.x  x.x          "
+			+ " x.xxxx x.x x.x xxxxxexxxxx x.x  x.x          "
+			+ " x....x x.xxx.x xeeeeeeeeex x.x  x.x          "
+			+ " x.xxxx x.....xxxeeeeeeeeexxx.xxxx.x          "
+			+ " x.x    x.xxx.eee0ee1e2ee3eee......x          "
 			+ " x.x    x.x x.xxxxxxxxxxxxxxx.xxxx.x          "
 			+ " x.x    x.x x.x             x.x  x.x          "
 			+ " x.xxxxxx.xxx.xxxxxxxxxxxxxxx.xxxx.xxxxxxxxxx "
@@ -28,27 +28,55 @@ public class Labirinto {
 			+ " x.xxx.xxxxxxxxxxxxxx.xxxxx.xxx.xxxxxxx.xxx.x " 	
 			+ " x.x x.x            x.x   x.x x.x     x.x x.x " 			
 			+ " x.xxx.x xxxxxxxxxxxx.x xxx.xxx.x xxxxx.xxx.x " 			
-			+ " x.....x x............x xo......x xo........x " 			
+			+ " x.....x x............x x.......x x.........x " 			
 			+ " x.xxx.x xxxx.xxx.xxx.x xxx.xxx.x x.xxxxxxx.x " 			
 			+ " x.x x.x    x.x x.x x.x   x.x x.x x.x     x.x " 			
 			+ " x.xxx.xxxxxx.xxx.xxx.xxxxx.xxx.xxx.xxxxxxx.x " 
-			+ " xo.........................................x "
+			+ " x..........................................x "
 			+ " xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx "
 
 			+ "                                              ";
 	
-	public static char celula(int i, int j){
-		return labirinto.charAt(j + i*largura);
+	public static char getCelula(int i, int j){
+		return labirinto.charAt(j + i*getLargura());
+	}
+	
+	public static void setCelula(int i, int j, char c){
+		char[] array = labirinto.toCharArray();
+		array[j + i*getLargura()] = c;
+		labirinto = new String(array);
 	}
 	
 	public static int[] coordenadaInicial(){
 		int posicao = Labirinto.labirinto.indexOf("s");
-		return new int[]{posicao/largura, posicao%largura} ;
+		if(posicao == -1)
+			return null;
+		
+		return new int[]{posicao/getLargura(), posicao%getLargura()} ;
 	}
 	
 	public static int[] coordenadaCelula(char c){
 		int posicao = Labirinto.labirinto.indexOf(c);
-		return new int[]{posicao/largura, posicao%largura} ;
+		if(posicao == -1)
+			return null;
+		
+		return new int[]{posicao/getLargura(), posicao%getLargura()} ;
+	}
+
+	public static int getAltura() {
+		return altura;
+	}
+
+	public static void setAltura(int altura) {
+		Labirinto.altura = altura;
+	}
+
+	public static int getLargura() {
+		return largura;
+	}
+
+	public static void setLargura(int largura) {
+		Labirinto.largura = largura;
 	}
 	
 }

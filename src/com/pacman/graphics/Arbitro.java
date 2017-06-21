@@ -38,8 +38,6 @@ public class Arbitro extends Frame implements ActionListener, WindowListener, Ru
 	private int sinalAtualizar = 0;
 	private long duracaoFrame = 60;
 	private Thread temporizador;
-	private String rastroPacman = "";
-	
 	private ControladorPacman controlPacman;
 	
 	private int altura;
@@ -54,6 +52,7 @@ public class Arbitro extends Frame implements ActionListener, WindowListener, Ru
 		GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
 		largura = gd.getDisplayMode().getWidth()/2;
 		altura = gd.getDisplayMode().getHeight()/2;
+		setSize(largura, altura);
 		
 		addWindowListener(this);
 		
@@ -78,13 +77,12 @@ public class Arbitro extends Frame implements ActionListener, WindowListener, Ru
 		labirinto = new DesenharLabirinto(this);
 		
 		//Cria e inicia thread do controlador do pacman
-		int[] posicao = labirinto.coordenadaInicial();
+		int[] posicao = Labirinto.coordenadaInicial();
 		controlPacman = new ControladorPacman(posicao[0], posicao[1]);
 		MaquinaDeEstados inPacman = new MaquinaDeEstados(controlPacman);
 		threadPacman = new Thread(inPacman);
 		threadPacman.start();
 		
-		setSize(largura, altura);
 		this.setVisible(true);
 		
 	}
@@ -127,9 +125,9 @@ public class Arbitro extends Frame implements ActionListener, WindowListener, Ru
 		if (sinalAtualizar > 0)
 		{
 			sinalAtualizar = 0;
-			int posX = largura/2 - labirinto.getLargura()/2;
-			int posY = altura/2 - labirinto.getAltura()/2;
-			labirinto.Renderizar(g, posX, posY);
+			int posX = largura/2 - labirinto.getLargura()*labirinto.getDimensao()/2;
+			int posY = altura/2 - labirinto.getAltura()*labirinto.getDimensao()/2;
+			labirinto.renderizar(g, posX, posY);
 			
 			int d = labirinto.getDimensao();
 			int[] posicao = controlPacman.getPosicao();
@@ -153,6 +151,8 @@ public class Arbitro extends Frame implements ActionListener, WindowListener, Ru
 				int[] pos = controlFantasmas[i].getPosicao();
 				fantasmas[i].Animar(g, posX + pos[1]*d - d/2, 
 									   posY + pos[0]*d - d/2);
+				
+				//Chaca a condição de morte do pacman "encostar em um fantasma"
 				if(pos[0] == posicao[0] && pos[1] == posicao[1]){
 					controlPacman.controlador('m');
 				}
@@ -207,19 +207,15 @@ public class Arbitro extends Frame implements ActionListener, WindowListener, Ru
 	public void keyPressed(KeyEvent arg0) {
 		switch(arg0.getKeyCode()){
 		case KeyEvent.VK_RIGHT:
-			rastroPacman += "d";
 			controlPacman.controlador('d');
 			break;
 		case KeyEvent.VK_LEFT:
-			rastroPacman += "e";
 			controlPacman.controlador('e');
 			break;
 		case KeyEvent.VK_UP:
-			rastroPacman += "c";
 			controlPacman.controlador('c');
 			break;
 		case KeyEvent.VK_DOWN:
-			rastroPacman += "b";
 			controlPacman.controlador('b');
 			break;
 		default:
