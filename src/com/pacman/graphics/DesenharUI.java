@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Frame;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Insets;
 import java.awt.Menu;
@@ -13,8 +14,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.InputStream;
 
-public class DesenharUI extends Frame implements ActionListener, WindowListener{
+import javax.imageio.ImageIO;
+
+public class DesenharUI extends Frame implements ActionListener, WindowListener, Runnable{
 
 	/**
 	 * 
@@ -26,28 +32,48 @@ public class DesenharUI extends Frame implements ActionListener, WindowListener{
 	private Image imgScore;
 	private Graphics imgScoreG;
 	private Image imgHiScore;
+	private Image spriteSheet;
 	private Graphics imgHiScoreG;
-	private Graphics pacmanG;
 	private boolean gameInit = false;
 	private int changeHiScore;
 	private int changeScore;
 	
 	AnimacaoPacman pacman;
+	DesenharLabirinto labirinto;
+	private int sinalAtualizar = 0;
+	private long duracaoFrame = 60;
+	private Thread temporizador;
 
 	public DesenharUI(){
 		super("PAC MAN");
 		addWindowListener(this);
 		
-		initGUI();
+		iniGUI();
 		sobre.addActionListener(this);
 		
 		setSize(640, 480);
 		this.setVisible(true);
 		
-		pacman = new AnimacaoPacman(pacmanG, this);
+        String path = "pacman-large.png";
+        try {
+        	InputStream stream = Thread.currentThread().getContextClassLoader().getResourceAsStream(path);
+        	spriteSheet = ImageIO.read(stream);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+        int resW = spriteSheet.getWidth(this)/4;
+        int resH = spriteSheet.getHeight(this)/4;
+        BufferedImage scaledBI = new BufferedImage(resW, resH, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g = scaledBI.createGraphics();
+        g.drawImage(spriteSheet, 0, 0, resW, resH, null); 
+        g.dispose();
+        
+		pacman = new AnimacaoPacman(scaledBI, this);
+		pacman.Play(AnimacaoPacman.Frames.MORTE);
+		labirinto = new DesenharLabirinto(this);
 	}
 	
-	void initGUI()
+	void iniGUI()
 	{
 		menu = new MenuBar();
 		ajuda = new Menu("Ajuda");
@@ -57,8 +83,15 @@ public class DesenharUI extends Frame implements ActionListener, WindowListener{
 		menu.add(ajuda);
 
 		setMenuBar(menu);
+		
+		
 
 		addNotify();  // for updated inset information
+	}
+	
+	void iniciarLoop(){
+		temporizador = new Thread(this);
+		temporizador.start();
 	}
 	
 	public void paint(Graphics g){
@@ -87,6 +120,7 @@ public class DesenharUI extends Frame implements ActionListener, WindowListener{
 	
 			setResizable(false);
 			gameInit = true;
+			iniciarLoop();
 		}
 		g.setColor(Color.black);
 		g.fillRect(0,0,640,480);
@@ -118,9 +152,19 @@ public class DesenharUI extends Frame implements ActionListener, WindowListener{
 
 			changeScore=0;
 		}
-		pacman.Play(g);
+		
 	}
 	
+	
+	public void update(Graphics g)
+	{
+		if (sinalAtualizar > 0)
+		{
+			sinalAtualizar = 0;
+			pacman.Animar(g);
+			labirinto.Renderizar(g);
+		}
+	}
 
 	@Override
 	public void windowActivated(WindowEvent e) {}
@@ -138,4 +182,19 @@ public class DesenharUI extends Frame implements ActionListener, WindowListener{
 	public void windowOpened(WindowEvent e) {}
 	@Override
 	public void actionPerformed(ActionEvent e) {}
+	
+	public void run()
+	{
+		while (true)
+		{	
+			try { Thread.sleep(duracaoFrame); } 
+			catch (InterruptedException e)
+			{
+				return;
+			}
+
+			sinalAtualizar++;
+			repaint();
+		}
+	}
 }
