@@ -85,6 +85,6 @@ public class AnimacaoPacman {
 	
 	public void Animar(Graphics g, int x, int y){
 		g.drawImage( frames[contador++], x, y, frame );
-		if(contador > atual.fim) contador = atual.inicio;
+		if(contador >  atual.fim) contador = atual.inicio;
 	}
 }

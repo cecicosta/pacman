@@ -48,7 +48,6 @@ public class Arbitro extends Frame implements ActionListener, WindowListener, Ru
 	private Thread[] threadFantasmas = new Thread[4];
 	public Arbitro(){
 		super("PAC MAN");
-		
 		GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
 		largura = gd.getDisplayMode().getWidth()/2;
 		altura = gd.getDisplayMode().getHeight()/2;
@@ -152,7 +151,7 @@ public class Arbitro extends Frame implements ActionListener, WindowListener, Ru
 				fantasmas[i].Animar(g, posX + pos[1]*d - d/2, 
 									   posY + pos[0]*d - d/2);
 				
-				//Chaca a condição de morte do pacman "encostar em um fantasma"
+				//Checa a condição de morte do pacman "encostar em um fantasma"
 				if(pos[0] == posicao[0] && pos[1] == posicao[1]){
 					controlPacman.controlador('m');
 				}
@@ -199,6 +198,7 @@ public class Arbitro extends Frame implements ActionListener, WindowListener, Ru
 				controlFantasmas[i].controlador(posicao[0], posicao[1]);
 			}
 			sinalAtualizar++;
+			update(this.getGraphics());
 			repaint();
 		}
 	}
