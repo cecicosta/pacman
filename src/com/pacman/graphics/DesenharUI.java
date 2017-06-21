@@ -6,7 +6,6 @@ import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
-import java.awt.Insets;
 import java.awt.Menu;
 import java.awt.MenuBar;
 import java.awt.MenuItem;
@@ -69,7 +68,7 @@ public class DesenharUI extends Frame implements ActionListener, WindowListener,
         g.dispose();
         
 		pacman = new AnimacaoPacman(scaledBI, this);
-		pacman.Play(AnimacaoPacman.Frames.MORTE);
+		pacman.Play(AnimacaoPacman.Frames.DIREITA);
 		labirinto = new DesenharLabirinto(this);
 	}
 	
@@ -116,14 +115,14 @@ public class DesenharUI extends Frame implements ActionListener, WindowListener,
 			imgScoreG.drawString("SCORE", 0, 14);
 
 	
-			setSize(640,480);
+			setSize(640,640);
 	
 			setResizable(false);
 			gameInit = true;
 			iniciarLoop();
 		}
 		g.setColor(Color.black);
-		g.fillRect(0,0,640,480);
+		g.fillRect(0,0,640,640);
 		
 		changeScore=1;
 		changeHiScore=1;
@@ -161,8 +160,9 @@ public class DesenharUI extends Frame implements ActionListener, WindowListener,
 		if (sinalAtualizar > 0)
 		{
 			sinalAtualizar = 0;
-			pacman.Animar(g);
 			labirinto.Renderizar(g);
+			pacman.Animar(g);
+			
 		}
 	}
 

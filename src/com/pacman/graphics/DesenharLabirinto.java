@@ -6,8 +6,8 @@ import java.awt.Graphics;
 import java.awt.Image;
 
 public class DesenharLabirinto {
-	private int altura = 22;
-	private int largura = 52;
+	private int altura = 31;
+	private int largura = 46;
 	
 	static final int HEIGHT=16;
 	static final int WIDTH=21;
@@ -17,39 +17,51 @@ public class DesenharLabirinto {
 	private int d = 12;
 	
 	String labirinto = ""
-			+ "                                                    "
-			+ " xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx "
-			+ " x................................................x "
-			+ " x....xxxxxxxxx.xxx...............................x "
-			+ " x............x.x.x...............................x "
-			+ " x....xxxxxxx.x.x.x...............................x "
-			+ " x..........x.x.x.xx..............................x "
-			+ " x..........x.....x...............................x "
-			+ " x..........xxxxx.x...............................x "
-			+ " x..............x.x...............................x "
-			+ " x..............x.x...............................x "
-			+ " x..............x.x...............................x "
-			+ " x................................................x "
-			+ " x................................................x "
-			+ " x................................................x "
-			+ " x................................................x "
-			+ " x................................................x "
-			+ " x................................................x "
-			+ " x................................................x "
-			+ " x................................................x "
-			+ " xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx "
-			+ "                                                    ";
+			+ "                                              "
+			+ " xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx "
+			+ " x.........................................ox "
+			+ " x.xxxxxxx.xxx.xxx.xxxxx.xxx.xxx.xxxxxx.xxx.x "
+			+ " x.x     x.x x.x x.x   x.x x.x x.x    x.x x.x "
+			+ " x.xxxxxxx.x x.xxx.xxx x.xxx.xxx.xxxx x.xxx.x "
+			+ " x........ox x......ox x............x x.....x "
+			+ " x.xxx.xxxxx x.xxx.xxx x.xxxxxxxxxxxx x.xxx.x "
+			+ " x.x x.x     x.x x.x   x.x            x.x x.x "
+			+ " x.xxx.xxxxxxx.xxx.xxxxx.xxxxxxxxxxxxxx.xxx.x "
+			+ " x..........................................x "
+			+ " x.xxxxxx.xxx.xxxxxxx xxxxxxx.xxxx.xxxxxxxxxx "
+			+ " x.x    x.x x.x     x x     x.x  x.x          "
+			+ " x.xxxx x.x x.x xxxxx xxxxx x.x  x.x          "
+			+ " x....x x.xxx.x x         x x.x  x.x          "
+			+ " x.xxxx x.....x x         x x.xxxx.x          "
+			+ " x.x    x.xxx.x x         x x......x          "
+			+ " x.x    x.x x.x xxxxxxxxxxx x.xxxx.x          "
+			+ " x.x    x.x x.x             x.x  x.x          "
+			+ " x.xxxxxx.xxx.xxxxxxxxxxxxxxx.xxxx.xxxxxxxxxx "
+			+ " x..........................................x "
+			+ " x.xxx.xxxxxxxxxxxxxx.xxxxx.xxx.xxxxxxx.xxx.x " 	
+			+ " x.x x.x            x.x   x.x x.x     x.x x.x " 			
+			+ " x.xxx.x xxxxxxxxxxxx.x xxx.xxx.x xxxxx.xxx.x " 			
+			+ " x.....x x............x xo......x xo........x " 			
+			+ " x.xxx.x xxxx.xxx.xxx.x xxx.xxx.x x.xxxxxxx.x " 			
+			+ " x.x x.x    x.x x.x x.x   x.x x.x x.x     x.x " 			
+			+ " x.xxx.xxxxxx.xxx.xxx.xxxxx.xxx.xxx.xxxxxxx.x " 
+			+ " xo.........................................x "
+			+ " xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx "
+
+			+ "                                              ";
+	
+			
 	private Image imageMaze;
 	private Frame frame;
 	
 	public DesenharLabirinto(Frame frame){
 		this.frame = frame;
-		imageMaze = frame.createImage(360, 480);
+		imageMaze = frame.createImage(640, 640);
 		Graphics gmaze = imageMaze.getGraphics();
 
 		// background
 		gmaze.setColor(Color.BLACK);
-		gmaze.fillRect(0,0,360,480);
+		gmaze.fillRect(0,0,640,640);
 		desenhar(gmaze);
 	}
 	
@@ -88,9 +100,11 @@ public class DesenharLabirinto {
 					}else if( casa(i, j - 1) == 'x' || casa(i, j + 1) == 'x'){
 						g.drawLine(j*d,i*d,j*d+d,i*d);
 					
-				}else{
-					g.drawOval(i*d+3, j*d+3, 2, 2);
-				}
+					}
+			}else if(casa(i, j) == '.'){
+				g.drawRoundRect(j*d, i*d, 2, 2, 5,5);
+			}else if(casa(i, j) == 'o'){
+				g.drawRoundRect(j*d, i*d, 6, 6, 5,5);
 			}
 		}
 	}
@@ -99,6 +113,6 @@ public class DesenharLabirinto {
 	}
 	
 	public void Renderizar(Graphics g){
-		g.drawImage( imageMaze, 150, 150, frame );
+		g.drawImage( imageMaze, 50, 50, frame );
 	}
 }
