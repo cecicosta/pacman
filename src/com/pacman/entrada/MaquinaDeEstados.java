@@ -10,10 +10,13 @@ public class MaquinaDeEstados implements Runnable{
     public MaquinaDeEstados(ControladorAutomato c) {
     	this.c = c;
     }
+    public boolean lendoPalavra(){
+    	return atual < c.getPalavra().length();
+    }
 	@Override
 	public void run() {
 		while(true){
-			try { Thread.sleep(30); } 
+			try { Thread.sleep(15); } 
 			catch (InterruptedException e)
 			{
 				return;
@@ -21,7 +24,8 @@ public class MaquinaDeEstados implements Runnable{
 			if(atual < c.getPalavra().length()){
 				Estado e = c.getEstado();
 				System.out.flush();
-				c.setEstado(e.proximo(c.getPalavra().charAt(atual++)));	
+				c.setEstado(e.proximo(c.getPalavra().charAt(atual)));
+				atual++; //incrementa ao final, para permitir sincronizar arbitro
 			}
 		}
 	}

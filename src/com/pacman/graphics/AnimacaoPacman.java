@@ -15,6 +15,7 @@ public class AnimacaoPacman {
 	private int d = 16;
 	private Frames atual;
 	public enum Frames{
+		PARADO (0,0),
 		CIMA (3,5),
 		BAIXO(9,11),
 		DIREITA(6,8),
@@ -33,6 +34,7 @@ public class AnimacaoPacman {
 	private Image spriteSheet;
 	private BufferedImage frames[] = new BufferedImage[20];
 	private Frame frame;
+	private int delay = 0;
 	public AnimacaoPacman(Frame f){
 		frame = f;        
 		
@@ -83,8 +85,10 @@ public class AnimacaoPacman {
 		contador = atual.inicio;
 	}
 	
-	public void Animar(Graphics g, int x, int y){
-		g.drawImage( frames[contador++], x, y, frame );
+	public void Animar(Graphics g, int x, int y, int delay){
+		g.drawImage( frames[contador], x, y, frame );
+		this.delay = this.delay == 0? delay: this.delay - 1;
+		contador = this.delay == 0? contador + 1: contador;
 		if(contador >  atual.fim) contador = atual.inicio;
 	}
 }

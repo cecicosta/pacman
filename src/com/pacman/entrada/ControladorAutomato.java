@@ -5,6 +5,7 @@ public class ControladorAutomato {
 	String palavra = "";
 	Estados estado = Estados.DIREITA;
 	int[] posicao = {0,0};
+	private boolean corrdAtualizada = true;
 	public ControladorAutomato(int i, int j){
 		posicao[0] = i;
 		posicao[1] = j;
@@ -38,18 +39,26 @@ public class ControladorAutomato {
 		if(Labirinto.getCelula(posicao[0] + i, posicao[1] + j) != 'x'){
 			posicao[0] += i;
 			posicao[1] += j;
+			corrdAtualizada = true;
+		}else{
+			corrdAtualizada = false;
 		}
+			
 		estadoAtualizado(anterior, this.estado);
+	}
+	
+	public boolean coordAtualizada(){
+		return corrdAtualizada;
 	}
 
 	public Estados getEstado() {
 		return estado;
 	}
 	
-	public int[] getPosicao(){
+	public int[] getCoord(){
 		return posicao;
 	}
-	public void setPosicao(int i, int j){
+	public void setCoord(int i, int j){
 		posicao[0] = i;
 		posicao[1] = j;
 	}
@@ -64,6 +73,19 @@ public class ControladorAutomato {
 	
 	//Representação do automato para controle de movimentação
 	public enum Estados implements Estado {
+		PARADO {
+	        @Override
+	        public Estado proximo(char word) {
+	            switch(word) {
+                case 'c': return CIMA;
+                case 'b': return BAIXO;
+                case 'e': return ESQUERDA;
+                case 'd': return DIREITA;
+                case 'm': return MORTO;
+	            default: return null;
+	            }
+	        }
+	    },
 		CIMA {
 	        @Override
 	        public Estado proximo(char word) {

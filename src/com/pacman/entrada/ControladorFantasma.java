@@ -22,5 +22,13 @@ public class ControladorFantasma extends ControladorAutomato{
 			palavra += 'd';
 		else if(j < posicao[1] && Labirinto.getCelula(posicao[0], posicao[1] - 1) != 'x'&& escolha == 0)
 			palavra += 'e';
+		else if(i > posicao[0] && Labirinto.getCelula(posicao[0] + 1, posicao[1]) != 'x' && escolha == 0)
+			palavra += 'b';
+		else if(i < posicao[0] && Labirinto.getCelula(posicao[0] - 1, posicao[1]) != 'x' && escolha == 0)
+			palavra += 'c';
+		else if(j > posicao[1] && Labirinto.getCelula(posicao[0], posicao[1] + 1) != 'x' && escolha == 1)
+			palavra += 'd';
+		else if(j < posicao[1] && Labirinto.getCelula(posicao[0], posicao[1] - 1) != 'x'&& escolha == 1)
+			palavra += 'e';
 	}
 }
