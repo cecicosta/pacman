@@ -20,9 +20,10 @@ interface AnimFrame{
 public class Animador{
 	
 	private int ultimoFrame = 0;
+	private AnimFrame atual = Frames.NONE;
 	public enum Frames implements AnimFrame{
 		NONE(0,0);
-		Frames(int inicio, int fim){}
+		Frames(int inicio, int fim){this.inicio = inicio; this.fim = fim;}
     	public int inicio;
     	public int fim;
 		@Override
@@ -77,10 +78,10 @@ public class Animador{
 	}
 	
 	public AnimFrame getFrameAtual(){
-		return null;
+		return atual;
 	}
 	public void setFrameAtual(AnimFrame f){
-		
+		atual =  f;
 	}
 	
 	//Determina qual sequencia de frames será tocada

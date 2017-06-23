@@ -38,6 +38,10 @@ public class Labirinto {
 
 			+ "                                              ";
 	
+	public static void reiniciar(){
+		labirinto = labirinto.replace('v', '.');
+	}
+	
 	public static char getCelula(int i, int j){
 		return labirinto.charAt(j + i*getLargura());
 	}
@@ -83,6 +87,10 @@ public class Labirinto {
 
 	public static void setDim(int dim) {
 		Labirinto.dim = dim;
+	}
+
+	public static boolean vazio() {
+		return !labirinto.contains(".");
 	}
 	
 }

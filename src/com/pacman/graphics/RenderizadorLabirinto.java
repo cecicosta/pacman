@@ -69,7 +69,7 @@ public class RenderizadorLabirinto {
 			g.drawRoundRect(j*dim, i*dim, 2, 2, 5,5);
 		}else if(celula(i, j) == 'o'){
 			g.drawRoundRect(j*dim, i*dim, 6, 6, 5,5);
-		}else if(celula(i, j) == 'e'){
+		}else if(celula(i, j) == 'e' || celula(i, j) == 'v'){
 			gmaze.setColor(Color.BLACK);
 			g.fillRect(j*dim -dim/2, i*dim - dim/2, dim, dim);
 		}else if(celula(i, j) == ' '){
@@ -81,7 +81,7 @@ public class RenderizadorLabirinto {
 		int[] posicao;
 		
 		while((posicao = Labirinto.coordenadaCelula('n')) != null){
-			setCelula(posicao[0], posicao[1], 'e');
+			setCelula(posicao[0], posicao[1], 'v');
 		}
 		g.drawImage( imageMaze, x, y, frame );
 	}

@@ -1,6 +1,8 @@
 package com.pacman.graphics;
 
+import java.awt.Button;
 import java.awt.Color;
+import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.GraphicsDevice;
@@ -19,6 +21,7 @@ import com.pacman.elementos.Fantasma;
 import com.pacman.elementos.Pacman;
 import com.pacman.entrada.ControladorFantasma;
 import com.pacman.entrada.ControladorPacman;
+import com.pacman.entrada.Labirinto;
 
 public class Arbitro extends Frame implements ActionListener, WindowListener, Runnable, KeyListener{
 
@@ -36,12 +39,17 @@ public class Arbitro extends Frame implements ActionListener, WindowListener, Ru
 	private Thread temporizador;
 	private boolean gameInit = false;
 	
-	RenderizadorLabirinto labirinto;
+	private boolean exibirTelaInicial = true;
+	private int contadorVidas = 3;
+	private Animador vida;
+	private Animador telaInicial;
+	private RenderizadorLabirinto labirinto;
 	
 	private Fantasma[] fantasmas = new Fantasma[4];
 	private Pacman pacman;
 	private char entrada = 'p';
 	private boolean reiniciando;
+	private Button button;
 	
 	/**
 	* Construtor do Árbitro. É responsavel por inicializar os elementos 
@@ -87,6 +95,27 @@ public class Arbitro extends Frame implements ActionListener, WindowListener, Ru
 
 		setMenuBar(menu);
 		
+		vida = new Animador(this);
+		vida.carregarFrames("pacman-large.png", 7, 5, 1, 1, 16);
+		vida.Play(Animador.Frames.NONE);
+		
+		telaInicial = new Animador(this);
+		telaInicial.carregarFrames("capa.png", 0, 0, 1, 1, altura);
+		telaInicial.Play(Animador.Frames.NONE);
+		
+	    //Cria botão para iniciar o jogo
+	    button = new Button("Iniciar");
+	    button.addActionListener(new ActionListener()
+	    {
+	      public void actionPerformed(ActionEvent e)
+	      {
+	    	  exibirTelaInicial = false;
+	    	  iniciarLoop();
+	      }
+	    });
+	    setLayout(new FlowLayout());
+	    add(button);
+	    
 		addNotify();
 	}
 	
@@ -99,6 +128,7 @@ public class Arbitro extends Frame implements ActionListener, WindowListener, Ru
 	
 		if(reiniciando)
 			return;
+		contadorVidas--;
 		reiniciando = true;
 		Thread t = new Thread(new Runnable() {
 			
@@ -155,7 +185,10 @@ public class Arbitro extends Frame implements ActionListener, WindowListener, Ru
 	* para o estado inicial.
 	*/
 	void reiniciar(){
-		
+		Labirinto.reiniciar();
+		contadorVidas = 3;
+		reposicionar();
+		labirinto.desenhar();
 	}
 	
 	/**
@@ -178,7 +211,7 @@ public class Arbitro extends Frame implements ActionListener, WindowListener, Ru
 	
 			setResizable(false);
 			gameInit = true;
-			iniciarLoop();
+			telaInicial.Animar(g, 0, 0);
 		}
 		g.setColor(Color.black);
 		g.fillRect(0,0, largura, altura);	
@@ -196,8 +229,13 @@ public class Arbitro extends Frame implements ActionListener, WindowListener, Ru
 			int posY = altura/2 - labirinto.getAltura()*labirinto.getDimensao()/2;
 			labirinto.renderizar(g, posX, posY);
 			
-			fantasmasAtualizacao(g, posX, posY);
+			//fantasmasAtualizacao(g, posX, posY);
 			pacmanAtualizacao(g, posX, posY);
+			
+			for(int i=0; i<contadorVidas; i++){
+				vida.Animar(g, posX + (labirinto.getLargura()-i - 2)*labirinto.getDimensao(), 
+								   posY + labirinto.getAltura()*labirinto.getDimensao());
+			}
 			
 			sinalAtualizar = 0;
 		}
@@ -215,7 +253,8 @@ public class Arbitro extends Frame implements ActionListener, WindowListener, Ru
 		//Passos para atualizar o controlador esperam até pacman atingir posicao de destino
 		pacman.atualizarControlador(entrada, pacman.movendo());
 		pacman.move(g, posX, posY);
-		
+		if(Labirinto.vazio()) //Chaca condição de vitória do pacman, "nenhum '.' no labirinto
+			reiniciar();
 	}
 	
 	/**
@@ -236,7 +275,10 @@ public class Arbitro extends Frame implements ActionListener, WindowListener, Ru
 			//Checa a condição de morte do pacman "encostar em um fantasma"
 			if(pos[0] == coord[0] && pos[1] == coord[1]){
 				entrada = 'm';
-				reposicionar(); //reinicia os elementos móveis
+				if(contadorVidas > 0)
+					reposicionar(); //reinicia os elementos móveis
+				else
+					reiniciar();
 			}
 		}
 	}
