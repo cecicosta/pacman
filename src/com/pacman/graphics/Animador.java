@@ -96,10 +96,10 @@ public class Animador{
 		if(contador > getFrameAtual().fim()) contador = getFrameAtual().inicio();
 	}
 	
-	public void Animar(Graphics g, int x, int y, int delay){
+	public void Animar(Graphics g, int x, int y, int delay, boolean loop){
 		g.drawImage( frames[contador], x, y, frame );
 		this.delay = this.delay == 0? delay: this.delay  - 1;
 		contador = this.delay == 0? contador + 1: contador;
-		if(contador >  getFrameAtual().fim()) contador = getFrameAtual().inicio();
+		if(contador >  getFrameAtual().fim() && loop) contador = getFrameAtual().inicio();
 	}
 }

@@ -3,9 +3,9 @@ package com.pacman.elementos;
 import java.awt.Frame;
 import java.awt.Graphics;
 
-import com.pacman.entrada.ControladorAutomato.Estados;
 import com.pacman.entrada.ControladorPacman;
 import com.pacman.entrada.Labirinto;
+import com.pacman.entrada.ControladorAutomato.Estados;
 import com.pacman.graphics.AnimadorPacman;
 
 public class Pacman extends ElementoMovel{
@@ -15,7 +15,9 @@ public class Pacman extends ElementoMovel{
 		super(controlador, inicio);
 		
 		animador = new AnimadorPacman(frame);
-		animador.carregarFrames("pacman-large.png", 9, 0, 2, 6, 16);
+		animador.carregarFrames("pacman-large.png", 9, 0, 2, 6, 16); //frames de movimento
+		animador.carregarFrames("pacman-large.png", 8, 0, 1, 8, 16); //frames de morte - inicio
+		animador.carregarFrames("pacman-large.png", 7, 0, 1, 4, 16); //frames de morte - fim
 		animador.Play(AnimadorPacman.Frames.PARADO);
 	}
 	
@@ -24,8 +26,8 @@ public class Pacman extends ElementoMovel{
 		return (ControladorPacman) controlador;
 	}
 	
-	public void atualizarControlador(Estados estado, boolean esperar){
-		getControlador().atualizarControlador(estado, animador, esperar);
+	public void atualizarControlador(char entrada, boolean esperar){
+		getControlador().atualizarControlador(entrada, animador, esperar);
 	}
 	
 	public boolean movendo(){
@@ -42,7 +44,8 @@ public class Pacman extends ElementoMovel{
 		int dy = (int) ((pos[1]*dim - ultimaPosicao[1])*velocidade);
 		
 		animador.Animar(g, posX + ultimaPosicao[1] + dy - dim/2, 
-				   		   posY + ultimaPosicao[0] + dx - dim/2, 1);
+				   		   posY + ultimaPosicao[0] + dx - dim/2, 1, 
+				   		   controlador.getEstado() == Estados.MORTO? false: true);
 		
 		if(pos[0]*dim == ultimaPosicao[0] + dx && pos[1]*dim == ultimaPosicao[1] + dy){
 			ultimaPosicao[0] = pos[0]*dim;

@@ -17,7 +17,6 @@ import java.awt.event.WindowListener;
 
 import com.pacman.elementos.Fantasma;
 import com.pacman.elementos.Pacman;
-import com.pacman.entrada.ControladorAutomato.Estados;
 import com.pacman.entrada.ControladorFantasma;
 import com.pacman.entrada.ControladorPacman;
 
@@ -41,7 +40,8 @@ public class Arbitro extends Frame implements ActionListener, WindowListener, Ru
 	
 	private Fantasma[] fantasmas = new Fantasma[4];
 	private Pacman pacman;
-	private Estados pacmanEstado = Estados.PARADO;
+	private char entrada = 'p';
+	private boolean reiniciando;
 	
 	/**
 	* Construtor do Árbitro. É responsavel por inicializar os elementos 
@@ -69,7 +69,6 @@ public class Arbitro extends Frame implements ActionListener, WindowListener, Ru
 		
 		pacman = new Pacman(this, new ControladorPacman(0, 0), 's');
 		pacman.iniciar();
-		pacmanEstado = Estados.PARADO;
 		
 		this.setVisible(true);
 	}
@@ -93,16 +92,31 @@ public class Arbitro extends Frame implements ActionListener, WindowListener, Ru
 	
 
 	/**
-	* Este método cria uma thread para interromper as threads dos elementos 
-	* móveis antes de reposicionar.
+	* Este método cria uma thread para interromper as threads dos elementos móveis e do Árbitro
+	* antes de reposicionar.
 	*/
 	void reposicionar(){
+	
+		if(reiniciando)
+			return;
+		reiniciando = true;
 		Thread t = new Thread(new Runnable() {
 			
 			public void run()
 			{
+				//Pequeno intervalo antes que as posições sejam reiniciadas
+				try { Thread.sleep(2000); } 
+				catch (InterruptedException e) {
+					return;
+				}
+				entrada = 'p';
 				boolean todosInterrompidos = false;
+				//Garante que primeiramente o thread do árbitro é interrompida
+				try{ temporizador.interrupt();} catch(Exception e){}
+				while(temporizador.isAlive());
+				
 				try{
+					temporizador.interrupt();
 					for(int i=0; i<4; i++){
 						fantasmas[i].getThread().interrupt();
 					}
@@ -110,11 +124,8 @@ public class Arbitro extends Frame implements ActionListener, WindowListener, Ru
 				}catch(Exception e){
 					e.printStackTrace();
 				}
+				//Espera até que todas as threads sejam interrompidas
 				while(!todosInterrompidos){
-					try { Thread.sleep(10); } 
-					catch (InterruptedException e) {
-						return;
-					}
 					todosInterrompidos = true;
 					for(int i=0; i<4; i++){
 						if(fantasmas[i].getThread().isAlive()){
@@ -124,13 +135,16 @@ public class Arbitro extends Frame implements ActionListener, WindowListener, Ru
 					}
 					todosInterrompidos = pacman.getThread().isAlive()? false: todosInterrompidos;
 				}
+				//Reinicia todas as threads
 				for(int i=0; i<4; i++){
 					fantasmas[i].reiniciar();
 					fantasmas[i].iniciar();
 				}
 				pacman.reiniciar();
 				pacman.iniciar();
-				pacmanEstado = Estados.PARADO;
+				
+				iniciarLoop();
+				reiniciando = false;
 			}
 		});
 		t.start();
@@ -178,14 +192,12 @@ public class Arbitro extends Frame implements ActionListener, WindowListener, Ru
 	public void update(Graphics g)
 	{
 		if (sinalAtualizar > 0){
-
 			int posX = largura/2 - labirinto.getLargura()*labirinto.getDimensao()/2;
 			int posY = altura/2 - labirinto.getAltura()*labirinto.getDimensao()/2;
 			labirinto.renderizar(g, posX, posY);
 			
-			pacmanAtualizacao(g, posX, posY);
-			
 			fantasmasAtualizacao(g, posX, posY);
+			pacmanAtualizacao(g, posX, posY);
 			
 			sinalAtualizar = 0;
 		}
@@ -201,12 +213,21 @@ public class Arbitro extends Frame implements ActionListener, WindowListener, Ru
 	*/
 	void pacmanAtualizacao(Graphics g, int posX, int posY){
 		//Passos para atualizar o controlador esperam até pacman atingir posicao de destino
-		pacman.atualizarControlador(pacmanEstado, pacman.movendo());
+		pacman.atualizarControlador(entrada, pacman.movendo());
 		pacman.move(g, posX, posY);
 		
 	}
 	
+	/**
+	* Este método chama as rotinas especificas dos fantasmas para atualizar seus estados
+	* e, animar e renderizar os sprites na tela.
+	* @param g Objeto do tipo Graphics, utilizado para renderizar as imagens 
+	* no Frame.
+	* @param posX Posição X global na tela onde os objetos estão sendo renderizados.
+	* @param posY Posição Y global na tela onde os objetos estão sendo renderizados.
+	*/
 	void fantasmasAtualizacao(Graphics g, int posX, int posY){
+		//Obtém coordenadas do pacma, para que os fantasmas o localizem
 		int[] coord = pacman.getControlador().getCoordenadas();
 		
 		for(int i=0; i<4; i++){
@@ -214,8 +235,8 @@ public class Arbitro extends Frame implements ActionListener, WindowListener, Ru
 			int[] pos = fantasmas[i].getControlador().getCoordenadas();
 			//Checa a condição de morte do pacman "encostar em um fantasma"
 			if(pos[0] == coord[0] && pos[1] == coord[1]){
-				pacman.getControlador().setEntrada('m');
-				reposicionar();
+				entrada = 'm';
+				reposicionar(); //reinicia os elementos móveis
 			}
 		}
 	}
@@ -261,16 +282,16 @@ public class Arbitro extends Frame implements ActionListener, WindowListener, Ru
 	public void keyPressed(KeyEvent arg0) {		
 		switch(arg0.getKeyCode()){
 		case KeyEvent.VK_RIGHT:
-			pacmanEstado = Estados.DIREITA;
+			entrada = 'd';
 			break;
 		case KeyEvent.VK_LEFT:
-			pacmanEstado = Estados.ESQUERDA;
+			entrada = 'e';
 			break;
 		case KeyEvent.VK_UP:
-			pacmanEstado = Estados.CIMA;
+			entrada = 'c';
 			break;
 		case KeyEvent.VK_DOWN:
-			pacmanEstado = Estados.BAIXO;
+			entrada = 'b';
 			break;
 		default:
 		}

@@ -13,7 +13,7 @@ public class AnimadorPacman extends Animador{
 		BAIXO(9,11),
 		DIREITA(6,8),
 		ESQUERDA(0,2),
-		MORTE (12,19);
+		MORTE (12,23);
 		Frames(int inicio, int fim){ this.inicio = inicio; this.fim = fim; }
     	public int inicio;
     	public int fim;

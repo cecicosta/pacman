@@ -10,55 +10,67 @@ public class ControladorPacman extends ControladorAutomato {
 	public ControladorPacman(int i, int j) {
 		super(i, j);
 	}	
+	
+	/**
+	* Recebe uma nova entrada da palavra que será processada pelo autômato
+	* @param c Charcater representando a entrada da palavra
+	*/
 	public void setEntrada(char c){
-		if(leituraCompleta())
+		if(leituraCompleta()) //Projetado para garantir a consistência da checagem "leituraCompleta()" com a MaquinaDeEstados
 			setLeituraPendente();
 		palavra += c;
 	}
+	
+	/**
+	* Método de callback chamado pela MaquinaDeEstados quando o estado é atualizado.
+	* @param anterior Estado antes da atualização
+	* @param novo Estado após a atualização
+	*/
 	@Override
 	public void estadoAtualizado(Estados anterior, Estados novo){
 		if(Labirinto.getCelula(posicao[0], posicao[1]) == '.'){
 			Labirinto.setCelula(posicao[0], posicao[1], 'n');
 		}
 	}
-	
+
 	/**
-	 * 	   [Novo Estado] ----> [Entrada do alfabeto] 
-	 * 			^					    |
-	 * 			|					    v
-	 * 		    |--------------- <Entrada valida?> 
-	 * 			|			   n	    | s
-	 * 			|					    v
-	 * 			|		[Atualiza coordenada no labirinto]
-	 * 			|					    |
-	 * 			|		   s		    v			 	 n
-	 * 			 -----------<Posição na tela atualizada?>--> (Fica em espera)
-	 */
-	
+	* Este método executa os passos necessários para atualização da entrada e 
+	* coordenadas no labirinto, além de definir os frames atuais da animação.
+	* @param entrada Nova entrada da palavra que o autômato do pacman irá processar.
+	* @param pacman Animador do pacman. Animação definida de acordo com a entrada estado
+	* @param espera se verdadeira indica que o método deve esperar após a atualização. 
+	* Utilizado para que o Árbitro atualize a posição da animação de acordo com a 
+	* nova coordenada.
+	*/
 	//Passos para atualização da entrada, animações e coordenadas no labirinto. 
 	//entra em espera até que o árbitro termine de atualizar a posição na tela 
-	public void atualizarControlador(Estados novoEstado, AnimadorPacman pacman , boolean espera){
+	public void atualizarControlador(char entrada, AnimadorPacman pacman , boolean espera){
+
 		if(passoAtuaizacao == 0){
-			switch(novoEstado){
-			case PARADO:
+			switch(entrada){
+			case 'p':
+				setEntrada(entrada);
+				passoAtuaizacao = 1;
 				pacman.Play(Frames.PARADO); break;
-			case DIREITA:
-				setEntrada('d');
+			case 'd':
+				setEntrada(entrada);
 				passoAtuaizacao = 1;
 				pacman.Play(Frames.DIREITA); break;
-			case ESQUERDA:
-				setEntrada('e');
+			case 'e':
+				setEntrada(entrada);
 				passoAtuaizacao = 1;
 				pacman.Play(Frames.ESQUERDA); break;
-			case CIMA:
-				setEntrada('c');
+			case 'c':
+				setEntrada(entrada);
 				passoAtuaizacao = 1;
 				pacman.Play(Frames.CIMA); break;
-			case BAIXO:
-				setEntrada('b');
+			case 'b':
+				setEntrada(entrada);
 				passoAtuaizacao = 1;
 				pacman.Play(Frames.BAIXO); break;
-			case MORTO:
+			case 'm':
+				setEntrada(entrada);
+				passoAtuaizacao = 1;
 				pacman.Play(Frames.MORTE); break;
 			}
 			
@@ -68,8 +80,9 @@ public class ControladorPacman extends ControladorAutomato {
 			if(coordAtualizada()){
 				passoAtuaizacao = 3;
 			}else{
+				//checa se a entrada significa 'm' morte ou 'p' parado e volta para o passo 0
+				entrada = entrada == 'm'? 'm': 'p'; 
 				passoAtuaizacao = 0;
-				novoEstado = novoEstado == Estados.MORTO? Estados.MORTO: Estados.PARADO;
 			}
 		}else if(passoAtuaizacao == 3){ 
 			passoAtuaizacao = espera? 3: 0;

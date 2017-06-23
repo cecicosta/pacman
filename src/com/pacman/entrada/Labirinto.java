@@ -48,14 +48,11 @@ public class Labirinto {
 		labirinto = new String(array);
 	}
 	
-	public static int[] coordenadaInicial(){
-		int posicao = Labirinto.labirinto.indexOf("s");
-		if(posicao == -1)
-			return null;
-		
-		return new int[]{posicao/getLargura(), posicao%getLargura()} ;
-	}
-	
+	/**
+	 * Encontra a coordenada de um character especifico
+	 * @param c character a ser procurado
+	 * @return array com duas posições, representando as coordenadas i,j (linha, coluna) do character.
+	 */
 	public static int[] coordenadaCelula(char c){
 		int posicao = Labirinto.labirinto.indexOf(c);
 		if(posicao == -1)
