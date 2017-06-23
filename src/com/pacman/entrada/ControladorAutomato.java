@@ -2,14 +2,30 @@ package com.pacman.entrada;
 
 public class ControladorAutomato {
 
+	/**
+	 * ControladorAutomato : Implementa as funcionalidades básicas do controlador
+	 * dos elementos móveis. Assim como o autômato finito deterministico (AFD) que controla a
+	 * movimentação desses elementos no labirinto. 
+	 * O alfabeto aceito pelo autômato é o seguinte: [c*b*e*d*]*
+	 * O autômato garante que dado uma palavra que pertença ao alfabeto gerado pela linguagem,
+	 * é possivel traçar a exata posição, em qualquer estado, de qualquer dos elementos móveis 
+	 * controlados pelo autômato.
+	 */
+	
 	String palavra = "";
 	Estados estado = Estados.DIREITA;
 	int[] posicao = {0,0};
 	private boolean corrdAtualizada = true;
+	private boolean leituraCompleta = true;
 	public ControladorAutomato(int i, int j){
 		posicao[0] = i;
 		posicao[1] = j;
 	}
+	public ControladorAutomato(){
+		posicao[0] = 0;
+		posicao[1] = 0;
+	}
+	
 	public String getPalavra() {
 		return palavra;
 	}
@@ -55,10 +71,10 @@ public class ControladorAutomato {
 		return estado;
 	}
 	
-	public int[] getCoord(){
+	public int[] getCoordenadas(){
 		return posicao;
 	}
-	public void setCoord(int i, int j){
+	public void setCoordenadas(int i, int j){
 		posicao[0] = i;
 		posicao[1] = j;
 	}
@@ -67,6 +83,18 @@ public class ControladorAutomato {
 		palavra = "";
 		posicao[0] = 0;
 		posicao[1] = 0;
+	}
+	
+	public boolean leituraCompleta(){
+		return leituraCompleta;
+	}
+	
+	public void setLeituraCompleta(){
+		leituraCompleta = true;
+	}
+	
+	public void setLeituraPendente(){
+		leituraCompleta = false;
 	}
 	
 	public void estadoAtualizado(Estados anterior, Estados novo){}

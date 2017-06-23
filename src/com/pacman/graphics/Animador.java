@@ -12,29 +12,35 @@ import java.io.InputStream;
 
 import javax.imageio.ImageIO;
 
-public class AnimacaoFantasmas {
-	private int dim = 16;
-	private Frames atual;
+interface AnimFrame{
+	public int inicio();
+	public int fim();
+}
+
+public class Animador{
+	
 	private int ultimoFrame = 0;
-	public enum Frames{
-		CIMA (6,7),
-		BAIXO(2,3),
-		DIREITA(0,1),
-		ESQUERDA(4,5);
-		
+	public enum Frames implements AnimFrame{
+		NONE(0,0);
+		Frames(int inicio, int fim){}
     	public int inicio;
     	public int fim;
-    	Frames(int inicio, int fim){
-    		this.inicio = inicio;
-    		this.fim = fim;
-    	}
+		@Override
+		public int inicio() {
+			return inicio;
+		}
+		@Override
+		public int fim() {
+			return fim;
+		}
 	}
 	private int contador;
 
 	private Image spriteSheet;
-	private BufferedImage frames[] = new BufferedImage[20];
+	private BufferedImage frames[] = new BufferedImage[100];
 	private Frame frame;
-	public AnimacaoFantasmas(Frame f){
+	private int delay = 0;
+	public Animador(Frame f){
 		frame = f;        
 	}
 	
@@ -70,16 +76,30 @@ public class AnimacaoFantasmas {
         ultimoFrame += dx*dy; //Evita que blocos de frames sejam subsescritos por multiplas chamadas
 	}
 	
+	public AnimFrame getFrameAtual(){
+		return null;
+	}
+	public void setFrameAtual(AnimFrame f){
+		
+	}
+	
 	//Determina qual sequencia de frames será tocada
-	public void Play(Frames frames){
-		if(frames == atual)
+	public void Play(AnimFrame frames){
+		if(frames == getFrameAtual())
 			return;
-		atual = frames;
-		contador = atual.inicio;
+		setFrameAtual(frames);
+		contador = getFrameAtual().inicio();
 	}
 	
 	public void Animar(Graphics g, int x, int y){
 		g.drawImage( frames[contador++], x, y, frame );
-		if(contador > atual.fim) contador = atual.inicio;
+		if(contador > getFrameAtual().fim()) contador = getFrameAtual().inicio();
+	}
+	
+	public void Animar(Graphics g, int x, int y, int delay){
+		g.drawImage( frames[contador], x, y, frame );
+		this.delay = this.delay == 0? delay: this.delay  - 1;
+		contador = this.delay == 0? contador + 1: contador;
+		if(contador >  getFrameAtual().fim()) contador = getFrameAtual().inicio();
 	}
 }

@@ -10,9 +10,14 @@ public class MaquinaDeEstados implements Runnable{
     public MaquinaDeEstados(ControladorAutomato c) {
     	this.c = c;
     }
+    public void resetar(){
+    	atual = 0;
+    	c.resetarControlador();
+    }
     public boolean lendoPalavra(){
     	return atual < c.getPalavra().length();
     }
+    //Rotina executada pela thread
 	@Override
 	public void run() {
 		while(true){
@@ -26,6 +31,9 @@ public class MaquinaDeEstados implements Runnable{
 				System.out.flush();
 				c.setEstado(e.proximo(c.getPalavra().charAt(atual)));
 				atual++; //incrementa ao final, para permitir sincronizar arbitro
+			}
+			if(!lendoPalavra() && !c.leituraCompleta()){
+				c.setLeituraCompleta();
 			}
 		}
 	}

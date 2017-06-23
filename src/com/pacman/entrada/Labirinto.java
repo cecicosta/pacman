@@ -3,6 +3,7 @@ package com.pacman.entrada;
 public class Labirinto {
 	private static int altura = 31;
 	private static int largura = 46;
+	private static int dim = 12;
 	public static String labirinto = ""
 			+ "                                              "
 			+ " xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx "
@@ -77,6 +78,14 @@ public class Labirinto {
 
 	public static void setLargura(int largura) {
 		Labirinto.largura = largura;
+	}
+
+	public static int getDimensao() {
+		return dim;
+	}
+
+	public static void setDim(int dim) {
+		Labirinto.dim = dim;
 	}
 	
 }

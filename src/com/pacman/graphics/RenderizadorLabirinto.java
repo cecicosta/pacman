@@ -7,14 +7,13 @@ import java.awt.Image;
 
 import com.pacman.entrada.Labirinto;
 
-public class DesenharLabirinto {
-	private int d = 12;	
-			
+public class RenderizadorLabirinto {
+	
 	private Image imageMaze;
 	Graphics gmaze;
 	private Frame frame;
 	
-	public DesenharLabirinto(Frame frame){
+	public RenderizadorLabirinto(Frame frame){
 		this.frame = frame;
 		imageMaze = frame.createImage(frame.getWidth(), frame.getHeight());
 		gmaze = imageMaze.getGraphics();
@@ -34,46 +33,47 @@ public class DesenharLabirinto {
 	}
 	
 	private void desenharCelula(Graphics g, int i, int j){
+		int dim = Labirinto.getDimensao();
 		gmaze.setColor(Color.BLUE);
 		if( celula(i, j) == 'x'){
 			if(i == 0 || i == getAltura() - 1){
-				g.drawLine(j*d,i*d,j*d+d,i*d);				
+				g.drawLine(j*dim,i*dim,j*dim+dim,i*dim);				
 				
 			}else if(j == 0 || j == getLargura() - 1){
-				g.drawLine(j*d,i*d,j*d,i*d+d);
+				g.drawLine(j*dim,i*dim,j*dim,i*dim+dim);
 				
 			}else if( celula(i + 1, j) == 'x' && celula(i, j + 1) == 'x'){
-				g.drawLine(j*d,i*d,j*d+d,i*d);
-				g.drawLine(j*d,i*d,j*d,i*d+d);
+				g.drawLine(j*dim,i*dim,j*dim+dim,i*dim);
+				g.drawLine(j*dim,i*dim,j*dim,i*dim+dim);
 				
 			}else if( celula(i + 1, j) == 'x' && celula(i, j - 1) == 'x'){
-				g.drawLine(j*d,i*d,j*d-d,i*d);
-				g.drawLine(j*d,i*d,j*d,i*d+d);
+				g.drawLine(j*dim,i*dim,j*dim-dim,i*dim);
+				g.drawLine(j*dim,i*dim,j*dim,i*dim+dim);
 				
 			}else if( celula(i - 1, j) == 'x' && celula(i, j + 1) == 'x'){
-				g.drawLine(j*d,i*d,j*d+d,i*d);
-				g.drawLine(j*d,i*d,j*d,i*d-d);
+				g.drawLine(j*dim,i*dim,j*dim+dim,i*dim);
+				g.drawLine(j*dim,i*dim,j*dim,i*dim-dim);
 				
 			}else if( celula(i - 1, j) == 'x' && celula(i, j - 1) == 'x'){
-				g.drawLine(j*d,i*d,j*d-d,i*d);
-				g.drawLine(j*d,i*d,j*d,i*d-d);
+				g.drawLine(j*dim,i*dim,j*dim-dim,i*dim);
+				g.drawLine(j*dim,i*dim,j*dim,i*dim-dim);
 				
 			}else if( celula(i - 1, j) == 'x' || celula(i + 1, j) == 'x'){
-				g.drawLine(j*d,i*d,j*d,i*d+d);
+				g.drawLine(j*dim,i*dim,j*dim,i*dim+dim);
 				
 			}else if( celula(i, j - 1) == 'x' || celula(i, j + 1) == 'x'){
-				g.drawLine(j*d,i*d,j*d+d,i*d);
+				g.drawLine(j*dim,i*dim,j*dim+dim,i*dim);
 			
 			}
 		}else if(celula(i, j) == '.'){
-			g.drawRoundRect(j*d, i*d, 2, 2, 5,5);
+			g.drawRoundRect(j*dim, i*dim, 2, 2, 5,5);
 		}else if(celula(i, j) == 'o'){
-			g.drawRoundRect(j*d, i*d, 6, 6, 5,5);
+			g.drawRoundRect(j*dim, i*dim, 6, 6, 5,5);
 		}else if(celula(i, j) == 'e'){
 			gmaze.setColor(Color.BLACK);
-			g.fillRect(j*d -d/2, i*d - d/2, d, d);
+			g.fillRect(j*dim -dim/2, i*dim - dim/2, dim, dim);
 		}else if(celula(i, j) == ' '){
-			g.fillRect(j*d -d/2, i*d - d/2, d, d);
+			g.fillRect(j*dim -dim/2, i*dim - dim/2, dim, dim);
 		}
 	}
 	
@@ -101,6 +101,6 @@ public class DesenharLabirinto {
 	}
 	
 	public int getDimensao(){
-		return d;
+		return Labirinto.getDimensao();
 	}
 }

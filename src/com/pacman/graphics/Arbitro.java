@@ -15,52 +15,38 @@ import java.awt.event.KeyListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
-import com.pacman.entrada.ControladorAutomato;
+import com.pacman.elementos.Fantasma;
+import com.pacman.elementos.Pacman;
 import com.pacman.entrada.ControladorAutomato.Estados;
 import com.pacman.entrada.ControladorFantasma;
 import com.pacman.entrada.ControladorPacman;
-import com.pacman.entrada.Labirinto;
-import com.pacman.entrada.MaquinaDeEstados;
-import com.pacman.graphics.AnimacaoPacman.Frames;
 
 public class Arbitro extends Frame implements ActionListener, WindowListener, Runnable, KeyListener{
 
-	/**
+	/**Classe que implementa o Árbitro no jogo pacman.
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 	private MenuBar menu;
 	private Menu ajuda;
 	private MenuItem sobre;
-	private boolean gameInit = false;
-	
-	AnimacaoFantasmas[] fantasmas = new AnimacaoFantasmas[4];
-	AnimacaoPacman pacman;
-	DesenharLabirinto labirinto;
+	private int altura;
+	private int largura;
 	private int sinalAtualizar = 0;
 	private long duracaoFrame = 30;
 	private Thread temporizador;
+	private boolean gameInit = false;
 	
-	private int altura;
-	private int largura;
-
-	private Thread threadPcman;
-	private ControladorFantasma[] controlFantasmas = new ControladorFantasma[4];
-	private ControladorPacman controlePcman;
-	private Thread[] threadFantasmas = new Thread[4];
-	private int[] ultimaPosPcman = new int[2];
-	private boolean posicaoAtualizada = false;
-	private float velocidade = 0;
-	private float speed = 0.25f;
-	private Estados novoEstado = Estados.PARADO;
-	private MaquinaDeEstados maquinaEstPcman;
-	private int estadoPipeline;
-	private float[] velocidadeF = new float[]{0,0,0,0};
-	private int[] estadoPipelineF = new int[]{0,0,0,0};
-	private MaquinaDeEstados[] inFantasma = new MaquinaDeEstados[4];
-	private boolean[] posicaoAtualizadaF = new boolean[]{false,false,false,false};
-	private int[] ultimaPosFant = new int[8];
-	private float speedF = 0.25f;
+	RenderizadorLabirinto labirinto;
+	
+	private Fantasma[] fantasmas = new Fantasma[4];
+	private Pacman pacman;
+	private Estados pacmanEstado = Estados.PARADO;
+	
+	/**
+	* Construtor do Árbitro. É responsavel por inicializar os elementos 
+	* da interface e elementos móveis como o pacman e os fantasmas.
+	*/
 	public Arbitro(){
 		super("PAC MAN");
 		GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
@@ -74,38 +60,23 @@ public class Arbitro extends Frame implements ActionListener, WindowListener, Ru
 		sobre.addActionListener(this);
 		addKeyListener(this);
 		
-		labirinto = new DesenharLabirinto(this);
+		labirinto = new RenderizadorLabirinto(this);
 		
 		for(int i=0; i<4; i++){
-			fantasmas[i] = new AnimacaoFantasmas(this);
-			fantasmas[i].carregarFrames("pacman-large.png", 12+i, 0, 1, 8, 16);
-			fantasmas[i].Play(AnimacaoFantasmas.Frames.CIMA);
-			
-			int[] pos = Labirinto.coordenadaCelula(Integer.toString(i).charAt(0));
-			ultimaPosFant[i*2] = pos[0]*labirinto.getDimensao();
-			ultimaPosFant[i*2+1] = pos[1]*labirinto.getDimensao();
-			controlFantasmas[i] = new ControladorFantasma(pos[0], pos[1]);
-			inFantasma[i] = new MaquinaDeEstados(controlFantasmas[i]);
-			threadFantasmas[i]= new Thread(inFantasma[i]);
-			threadFantasmas[i].start();
+			fantasmas[i] = new Fantasma(this,new ControladorFantasma(0,0), Integer.toString(i).charAt(0));
+			fantasmas[i].iniciar();
 		}
 		
-		pacman = new AnimacaoPacman(this);
-		pacman.Play(AnimacaoPacman.Frames.DIREITA);
-		
-		//Cria e inicia thread do controlador do pacman
-		int[] coord = Labirinto.coordenadaInicial();
-		ultimaPosPcman = new int[]{coord[0]*labirinto.getDimensao(),
-				  				  coord[1]*labirinto.getDimensao()};
-		controlePcman = new ControladorPacman(coord[0], coord[1]);
-		maquinaEstPcman = new MaquinaDeEstados(controlePcman);
-		threadPcman = new Thread(maquinaEstPcman);
-		threadPcman.start();
+		pacman = new Pacman(this, new ControladorPacman(0, 0), 's');
+		pacman.iniciar();
+		pacmanEstado = Estados.PARADO;
 		
 		this.setVisible(true);
-		
 	}
 	
+	/**
+	* Este método inicializa os elementos da GUI, como menus e botões.
+	*/
 	void iniGUI()
 	{
 		menu = new MenuBar();
@@ -120,11 +91,72 @@ public class Arbitro extends Frame implements ActionListener, WindowListener, Ru
 		addNotify();
 	}
 	
+
+	/**
+	* Este método cria uma thread para interromper as threads dos elementos 
+	* móveis antes de reposicionar.
+	*/
+	void reposicionar(){
+		Thread t = new Thread(new Runnable() {
+			
+			public void run()
+			{
+				boolean todosInterrompidos = false;
+				try{
+					for(int i=0; i<4; i++){
+						fantasmas[i].getThread().interrupt();
+					}
+					pacman.getThread().interrupt();
+				}catch(Exception e){
+					e.printStackTrace();
+				}
+				while(!todosInterrompidos){
+					try { Thread.sleep(10); } 
+					catch (InterruptedException e) {
+						return;
+					}
+					todosInterrompidos = true;
+					for(int i=0; i<4; i++){
+						if(fantasmas[i].getThread().isAlive()){
+							todosInterrompidos = false;
+							break;
+						}
+					}
+					todosInterrompidos = pacman.getThread().isAlive()? false: todosInterrompidos;
+				}
+				for(int i=0; i<4; i++){
+					fantasmas[i].reiniciar();
+					fantasmas[i].iniciar();
+				}
+				pacman.reiniciar();
+				pacman.iniciar();
+				pacmanEstado = Estados.PARADO;
+			}
+		});
+		t.start();
+	}
+	
+	/**
+	* Este método reinicia os elementos móveis e o estado do laborinto 
+	* para o estado inicial.
+	*/
+	void reiniciar(){
+		
+	}
+	
+	/**
+	* Este método dispara a thread do árbitro
+	*/
 	void iniciarLoop(){
 		temporizador = new Thread(this);
 		temporizador.start();
 	}
 	
+	/**
+	* Método invocado pelo Frame para atualizar a tela.
+	* @param g Objeto do tipo Graphic, utilizado para renderizar as imagens
+	* no Frame.
+	*/
 	public void paint(Graphics g){
 		
 		if (gameInit == false){	
@@ -138,7 +170,11 @@ public class Arbitro extends Frame implements ActionListener, WindowListener, Ru
 		g.fillRect(0,0, largura, altura);	
 	}
 	
-	//Atualiza entidades baseadas no estado e posição
+	/**
+	* Chama as rotinas específicas para atualizar os elementos móveis
+	* @param g Objeto do tipo Graphics, utilizado para renderizar as imagens
+	* no Frame.
+	*/
 	public void update(Graphics g)
 	{
 		if (sinalAtualizar > 0){
@@ -149,109 +185,38 @@ public class Arbitro extends Frame implements ActionListener, WindowListener, Ru
 			
 			pacmanAtualizacao(g, posX, posY);
 			
-			int[] coord = controlePcman.getCoord();
-			int dim = labirinto.getDimensao();
+			fantasmasAtualizacao(g, posX, posY);
 			
-			
-			for(int i=0; i<4; i++){
-				
-				if(estadoPipelineF[i] == 0){
-					controlFantasmas[i].controlador(coord[0], coord[1]);
-					estadoPipelineF[i] = 1;
-				}else if(estadoPipelineF[i] == 1){
-					estadoPipelineF[i] = inFantasma[i].lendoPalavra()? 1: 2;
-				}else if(estadoPipelineF[i] == 2){
-					if(controlFantasmas[i].coordAtualizada()){
-						estadoPipelineF[i] = 3;
-					}else{
-						estadoPipelineF[i] = 0;
-					}
-				}else if(estadoPipelineF[i] == 3){
-					estadoPipelineF[i] = posicaoAtualizadaF[i]? 0: 3;
-				}
-				
-				velocidadeF[i] += speedF ;
-				int[] pos = controlFantasmas[i].getCoord();
-				
-				int dx = (int) ((pos[0]*dim - ultimaPosFant[i*2])*velocidadeF[i]);
-				int dy = (int) ((pos[1]*dim - ultimaPosFant[i*2+1])*velocidadeF[i]);
-				
-				fantasmas[i].Animar(g, posX + ultimaPosFant[i*2+1] + dy - dim/2, 
-						   			   posY + ultimaPosFant[i*2] + dx - dim/2);
-				
-				if(pos[0]*dim == ultimaPosFant [i*2] + dx && pos[1]*dim == ultimaPosFant[i*2+1] + dy){
-					ultimaPosFant[i*2] = pos[0]*dim;
-					ultimaPosFant[i*2+1] = pos[1]*dim;
-					velocidadeF[i] = 0;
-					posicaoAtualizadaF[i] = true;
-				}else{
-					posicaoAtualizadaF[i] = false;
-				}
-				
-				//Checa a condição de morte do pacman "encostar em um fantasma"
-				if(pos[0] == coord[0] && pos[1] == coord[1]){
-					controlePcman.controlador('m');
-				}
-			}
 			sinalAtualizar = 0;
 		}
 	}
 	
+	/**
+	* Este método chama as rotinas especificas do pacman para atualizar seu estado
+	* e animar e renderizar os sprites na tela.
+	* @param g Objeto do tipo Graphics, utilizado para renderizar as imagens 
+	* no Frame.
+	* @param posX Posição X global na tela onde os objetos estão sendo renderizados.
+	* @param posY Posição Y global na tela onde os objetos estão sendo renderizados.
+	*/
 	void pacmanAtualizacao(Graphics g, int posX, int posY){
-		if(estadoPipeline == 0){
-			switch(novoEstado){
-			case PARADO:
-				pacman.Play(Frames.PARADO); break;
-			case DIREITA:
-				controlePcman.controlador('d');
-				estadoPipeline = 1;
-				pacman.Play(Frames.DIREITA); break;
-			case ESQUERDA:
-				controlePcman.controlador('e');
-				estadoPipeline = 1;
-				pacman.Play(Frames.ESQUERDA); break;
-			case CIMA:
-				controlePcman.controlador('c');
-				estadoPipeline = 1;
-				pacman.Play(Frames.CIMA); break;
-			case BAIXO:
-				controlePcman.controlador('b');
-				estadoPipeline = 1;
-				pacman.Play(Frames.BAIXO); break;
-			case MORTO:
-				pacman.Play(Frames.MORTE); break;
+		//Passos para atualizar o controlador esperam até pacman atingir posicao de destino
+		pacman.atualizarControlador(pacmanEstado, pacman.movendo());
+		pacman.move(g, posX, posY);
+		
+	}
+	
+	void fantasmasAtualizacao(Graphics g, int posX, int posY){
+		int[] coord = pacman.getControlador().getCoordenadas();
+		
+		for(int i=0; i<4; i++){
+			fantasmas[i].move(g, posX, posY, coord[0], coord[1]);
+			int[] pos = fantasmas[i].getControlador().getCoordenadas();
+			//Checa a condição de morte do pacman "encostar em um fantasma"
+			if(pos[0] == coord[0] && pos[1] == coord[1]){
+				pacman.getControlador().setEntrada('m');
+				reposicionar();
 			}
-			
-		}else if(estadoPipeline == 1){
-			estadoPipeline = maquinaEstPcman.lendoPalavra()? 1: 2;	
-		}else if(estadoPipeline == 2){
-			if(controlePcman.coordAtualizada()){
-				estadoPipeline = 3;
-			}else{
-				estadoPipeline = 0;
-				novoEstado = novoEstado == Estados.MORTO? Estados.MORTO: Estados.PARADO;
-			}
-		}else if(estadoPipeline == 3){
-			estadoPipeline = posicaoAtualizada? 0: 3;
-		}
-		
-		int dim = labirinto.getDimensao();
-		int[] coord = controlePcman.getCoord();
-		
-		velocidade += speed;
-		int dx = (int) ((coord[0]*dim - ultimaPosPcman[0])*velocidade);
-		int dy = (int) ((coord[1]*dim - ultimaPosPcman[1])*velocidade);
-		
-		pacman.Animar(g, posX + ultimaPosPcman[1] + dy - dim/2, 
-						 posY + ultimaPosPcman[0] + dx - dim/2, 1);
-		
-		if(coord[0]*dim == ultimaPosPcman[0] + dx && coord[1]*dim == ultimaPosPcman[1] + dy){
-			ultimaPosPcman[0] = coord[0]*dim;
-			ultimaPosPcman[1] = coord[1]*dim;
-			velocidade = 0;
-			posicaoAtualizada = true;
-		}else{
-			posicaoAtualizada = false;
 		}
 	}
 
@@ -262,9 +227,9 @@ public class Arbitro extends Frame implements ActionListener, WindowListener, Ru
 	@Override
 	public void windowClosing(WindowEvent e) { 
 		for(int i=0; i<4; i++){
-			threadFantasmas[i].interrupt();
+			fantasmas[i].getThread().interrupt();
 		}
-		threadPcman.interrupt();
+		pacman.getThread().interrupt();
 		temporizador.interrupt();
 		dispose(); 
 	}
@@ -279,16 +244,12 @@ public class Arbitro extends Frame implements ActionListener, WindowListener, Ru
 	@Override
 	public void actionPerformed(ActionEvent e) {}
 	
-	public void run()
-	{
-		while (true)
-		{	
+	public void run() {
+		while (true) {	
 			try { Thread.sleep(duracaoFrame); } 
-			catch (InterruptedException e)
-			{
+			catch (InterruptedException e) {
 				return;
 			}
-
 	
 			sinalAtualizar++;
 			update(this.getGraphics());
@@ -300,16 +261,16 @@ public class Arbitro extends Frame implements ActionListener, WindowListener, Ru
 	public void keyPressed(KeyEvent arg0) {		
 		switch(arg0.getKeyCode()){
 		case KeyEvent.VK_RIGHT:
-			novoEstado = Estados.DIREITA;
+			pacmanEstado = Estados.DIREITA;
 			break;
 		case KeyEvent.VK_LEFT:
-			novoEstado = Estados.ESQUERDA;
+			pacmanEstado = Estados.ESQUERDA;
 			break;
 		case KeyEvent.VK_UP:
-			novoEstado = Estados.CIMA;
+			pacmanEstado = Estados.CIMA;
 			break;
 		case KeyEvent.VK_DOWN:
-			novoEstado = Estados.BAIXO;
+			pacmanEstado = Estados.BAIXO;
 			break;
 		default:
 		}
