@@ -6,7 +6,7 @@ import com.pacman.graphics.AnimadorPacman.Frames;
 public class ControladorPacman extends ControladorAutomato {
 
 	private int passoAtuaizacao = 0;
-
+	private int contadotorPontos = 0;
 	public ControladorPacman(int i, int j) {
 		super(i, j);
 	}	
@@ -30,6 +30,7 @@ public class ControladorPacman extends ControladorAutomato {
 	public void estadoAtualizado(Estados anterior, Estados novo){
 		if(Labirinto.getCelula(posicao[0], posicao[1]) == '.'){
 			Labirinto.setCelula(posicao[0], posicao[1], 'n');
+			contadotorPontos++;
 		}
 	}
 
@@ -87,5 +88,13 @@ public class ControladorPacman extends ControladorAutomato {
 		}else if(passoAtuaizacao == 3){ 
 			passoAtuaizacao = espera? 3: 0;
 		}
+	}
+
+	public int getContadotorPontos() {
+		return contadotorPontos;
+	}
+
+	public void setContadotorPontos(int contadotorPontos) {
+		this.contadotorPontos = contadotorPontos;
 	}
 }

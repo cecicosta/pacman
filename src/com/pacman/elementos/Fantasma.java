@@ -15,7 +15,7 @@ public class Fantasma extends ElementoMovel{
 		super(controlador, inicio);
 		
 		animador = new AnimadorFantasmas(frame);
-		animador.carregarFrames("pacman-large.png", 12+id++, 0, 1, 8, 16);
+		animador.carregarFrames("pacman-large.png", 12+id++, 0, 1, 8, 16, 0.25f);
 		animador.Play(AnimadorFantasmas.Frames.CIMA);
 	}
 	

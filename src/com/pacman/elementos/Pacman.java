@@ -15,9 +15,9 @@ public class Pacman extends ElementoMovel{
 		super(controlador, inicio);
 		
 		animador = new AnimadorPacman(frame);
-		animador.carregarFrames("pacman-large.png", 9, 0, 2, 6, 16); //frames de movimento
-		animador.carregarFrames("pacman-large.png", 8, 0, 1, 8, 16); //frames de morte - inicio
-		animador.carregarFrames("pacman-large.png", 7, 0, 1, 4, 16); //frames de morte - fim
+		animador.carregarFrames("pacman-large.png", 9, 0, 2, 6, 16, 0.25f); //frames de movimento
+		animador.carregarFrames("pacman-large.png", 8, 0, 1, 8, 16, 0.25f); //frames de morte - inicio
+		animador.carregarFrames("pacman-large.png", 7, 0, 1, 4, 16, 0.25f); //frames de morte - fim
 		animador.Play(AnimadorPacman.Frames.PARADO);
 	}
 	

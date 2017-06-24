@@ -3,10 +3,12 @@ package com.pacman.graphics;
 import java.awt.Button;
 import java.awt.Color;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
+import java.awt.Image;
 import java.awt.Menu;
 import java.awt.MenuBar;
 import java.awt.MenuItem;
@@ -36,7 +38,7 @@ public class Arbitro extends Frame implements ActionListener, WindowListener, Ru
 	private int largura;
 	private int sinalAtualizar = 0;
 	private long duracaoFrame = 30;
-	private Thread temporizador;
+	private Thread temporizador = new Thread(this);;
 	private boolean gameInit = false;
 	
 	private boolean exibirTelaInicial = true;
@@ -50,6 +52,8 @@ public class Arbitro extends Frame implements ActionListener, WindowListener, Ru
 	private char entrada = 'p';
 	private boolean reiniciando;
 	private Button button;
+	private Image imgNome;
+	private Image imgPontos;
 	
 	/**
 	* Construtor do Árbitro. É responsavel por inicializar os elementos 
@@ -57,9 +61,9 @@ public class Arbitro extends Frame implements ActionListener, WindowListener, Ru
 	*/
 	public Arbitro(){
 		super("PAC MAN");
-		GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
-		largura = gd.getDisplayMode().getWidth()/2;
-		altura = gd.getDisplayMode().getHeight()/2;
+		setLayout(null);
+		largura = 640;
+		altura = 480;
 		setSize(largura, altura);
 		
 		addWindowListener(this);
@@ -67,6 +71,7 @@ public class Arbitro extends Frame implements ActionListener, WindowListener, Ru
 		iniGUI();
 		sobre.addActionListener(this);
 		addKeyListener(this);
+		
 		
 		labirinto = new RenderizadorLabirinto(this);
 		
@@ -96,26 +101,28 @@ public class Arbitro extends Frame implements ActionListener, WindowListener, Ru
 		setMenuBar(menu);
 		
 		vida = new Animador(this);
-		vida.carregarFrames("pacman-large.png", 7, 5, 1, 1, 16);
+		vida.carregarFrames("pacman-large.png", 7, 5, 1, 1, 16, 0.25f);
 		vida.Play(Animador.Frames.NONE);
 		
 		telaInicial = new Animador(this);
-		telaInicial.carregarFrames("capa.png", 0, 0, 1, 1, altura);
+		telaInicial.carregarFrames("capa.png", 0, 0, 1, 1, largura, 0.5f);
 		telaInicial.Play(Animador.Frames.NONE);
 		
 	    //Cria botão para iniciar o jogo
 	    button = new Button("Iniciar");
 	    button.addActionListener(new ActionListener()
 	    {
-	      public void actionPerformed(ActionEvent e)
-	      {
-	    	  exibirTelaInicial = false;
-	    	  iniciarLoop();
-	      }
-	    });
-	    setLayout(new FlowLayout());
+			public void actionPerformed(ActionEvent e)
+			{
+				setFocusable(true);
+				requestFocusInWindow();
+				button.setVisible(false);
+				exibirTelaInicial = false;
+			}
+		});
 	    add(button);
-	    
+	    button.setBounds(270, 250, 100, 30);
+	    revalidate();
 		addNotify();
 	}
 	
@@ -187,6 +194,7 @@ public class Arbitro extends Frame implements ActionListener, WindowListener, Ru
 	void reiniciar(){
 		Labirinto.reiniciar();
 		contadorVidas = 3;
+		pacman.getControlador().setContadotorPontos(0);
 		reposicionar();
 		labirinto.desenhar();
 	}
@@ -209,12 +217,23 @@ public class Arbitro extends Frame implements ActionListener, WindowListener, Ru
 		if (gameInit == false){	
 			setSize(largura, altura);
 	
+			
+			imgNome = createImage(250,30);
+			Graphics imgNomeG = imgNome.getGraphics();
+			imgNomeG.setColor(Color.black);
+			imgNomeG.fillRect(0, 0, 250, 30);
+			imgNomeG.setColor(Color.green);
+			imgNomeG.setFont(new Font("Helvetica", Font.BOLD, 12));
+			imgNomeG.drawString("Desenvolvido Por: Luis Felipe Nogueira", 0, 20);
+			
+			imgPontos = createImage(250,30);
+			
 			setResizable(false);
 			gameInit = true;
-			telaInicial.Animar(g, 0, 0);
+			iniciarLoop();
 		}
-		g.setColor(Color.black);
-		g.fillRect(0,0, largura, altura);	
+	
+
 	}
 	
 	/**
@@ -224,12 +243,17 @@ public class Arbitro extends Frame implements ActionListener, WindowListener, Ru
 	*/
 	public void update(Graphics g)
 	{
-		if (sinalAtualizar > 0){
+		//if (sinalAtualizar > 0)
+		{
+			
+			g.setColor(Color.black);
+			g.fillRect(0,0, largura, altura);
+			
 			int posX = largura/2 - labirinto.getLargura()*labirinto.getDimensao()/2;
 			int posY = altura/2 - labirinto.getAltura()*labirinto.getDimensao()/2;
 			labirinto.renderizar(g, posX, posY);
 			
-			//fantasmasAtualizacao(g, posX, posY);
+			fantasmasAtualizacao(g, posX, posY);
 			pacmanAtualizacao(g, posX, posY);
 			
 			for(int i=0; i<contadorVidas; i++){
@@ -237,7 +261,25 @@ public class Arbitro extends Frame implements ActionListener, WindowListener, Ru
 								   posY + labirinto.getAltura()*labirinto.getDimensao());
 			}
 			
+			//Atualiza os pontos na tela - Quantidade de bolinhas comidas
+			Graphics imgPontosG = imgPontos.getGraphics();
+			imgPontosG.setColor(Color.black);
+			imgPontosG.fillRect(0, 0, 250, 30);
+			imgPontosG.setColor(Color.green);
+			imgPontosG.setFont(new Font("Helvetica", Font.BOLD, 12));
+			imgPontosG.drawString("Pontos: " + pacman.getControlador().getContadotorPontos(), 0, 20);
+			g.drawImage(imgPontos, 
+					50, 420, this);
 			sinalAtualizar = 0;
+			
+			if(exibirTelaInicial){
+				g.setColor(Color.black);
+				g.fillRect(0,0, largura, altura);
+				button.setVisible(true);
+				telaInicial.Animar(g, 0, 0);
+				g.drawImage(imgNome, 
+						200, 300, this);
+			}
 		}
 	}
 	

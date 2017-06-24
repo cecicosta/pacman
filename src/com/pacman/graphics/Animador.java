@@ -46,7 +46,7 @@ public class Animador{
 	}
 	
 	//Carrega sprites da animação
-	public void carregarFrames(String name, int x, int y, int dx, int dy, int dim){
+	public void carregarFrames(String name, int x, int y, int dx, int dy, int dim, float reescalar){
         try {
         	InputStream stream = Thread.currentThread().getContextClassLoader().getResourceAsStream(name);
         	spriteSheet = ImageIO.read(stream);
@@ -54,8 +54,8 @@ public class Animador{
 			e.printStackTrace();
 		}
         //Redimenciona sprites 
-        int resW = spriteSheet.getWidth(frame)/4;
-        int resH = spriteSheet.getHeight(frame)/4;
+        int resW = (int) (spriteSheet.getWidth(frame)*reescalar);
+        int resH = (int) (spriteSheet.getHeight(frame)*reescalar);
         BufferedImage escalado = new BufferedImage(resW, resH, BufferedImage.TYPE_INT_RGB);
         Graphics2D g = escalado.createGraphics();
         g.drawImage(spriteSheet, 0, 0, resW, resH, null); 
@@ -65,7 +65,7 @@ public class Animador{
         		spriteSheet.getHeight(frame), BufferedImage.TYPE_INT_RGB);
         Graphics2D g2d = tileset.createGraphics();
         
-        //Carregar os frames de movimento do fantasma
+        //Cria os frames a partir de uma imagem com as varias posições
         for(int j=0; j < dx; j++){
         	for(int i=0; i < dy; i++){
 	        	g2d.drawImage(escalado, - (x+j)*dim, -(y+i)*dim, frame);
