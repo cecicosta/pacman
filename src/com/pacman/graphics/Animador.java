@@ -101,6 +101,7 @@ public class Animador{
 		g.drawImage( frames[contador], x, y, frame );
 		this.delay = this.delay == 0? delay: this.delay  - 1;
 		contador = this.delay == 0? contador + 1: contador;
-		if(contador >  getFrameAtual().fim() && loop) contador = getFrameAtual().inicio();
+		if(contador >  getFrameAtual().fim()) contador = loop? getFrameAtual().inicio(): 
+															   getFrameAtual().fim()+1;
 	}
 }
